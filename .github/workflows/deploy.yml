@@ -21,4 +21,4 @@ jobs:
       - name: Build Docker Image
         run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/backend:${{ github.sha }} -t ${{ secrets.DOCKER_HUB_USERNAME }}/backend:latest .
       - name: Push to Docker Hub
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/undefined:${{ github.sha }} && docker push ${{ secrets.DOCKER_HUB_USERNAME }}/undefined:latest
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:${{ github.sha }} && docker push ${{ secrets.DOCKER_HUB_USERNAME }}/backend:latest
