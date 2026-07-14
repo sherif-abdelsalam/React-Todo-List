@@ -1,14 +1,17 @@
-FROM node:20-alpine AS build
-WORKDIR /app
-
+# --- STAGE 1: Build & Install Dependencies ---
+FROM node:22-alpine AS builder
+WORKDIR /usr/src/app
 COPY package*.json ./
-RUN npm install
-
+RUN npm ci
 COPY . .
-RUN npm run build
 
-FROM nginx:alpine
-COPY --from=build /app/build /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
-    
+# --- STAGE 2: Production Runtime ---
+FROM node:22-alpine AS runner
+ENV NODE_ENV=production
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY --from=builder /usr/src/app ./
+USER node
+EXPOSE 3000
+CMD ["node", "index.js"]
