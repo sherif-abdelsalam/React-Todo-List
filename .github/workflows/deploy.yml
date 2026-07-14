@@ -1,4 +1,4 @@
-name: Backend Secure CI
+name: test-pipeline
 'on':
   push:
     branches:
@@ -13,12 +13,23 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
+      - name: Install Dependencies
+        run: npm ci
+      - name: Run Lint
+        run: npm run lint --if-present
+      - name: Run Tests
+        run: npm test --if-present
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:${{ github.sha }} -t ${{ secrets.DOCKER_USERNAME }}/backend:latest .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/test:${{ github.sha }} -t ${{ secrets.DOCKER_USERNAME }}/test:latest .
       - name: Push to Docker Hub
-        run: docker push ${{ secrets.DOCKER_USERNAME }}/backend:${{ github.sha }} && docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/test:${{ github.sha }} && docker push ${{ secrets.DOCKER_USERNAME }}/test:latest
