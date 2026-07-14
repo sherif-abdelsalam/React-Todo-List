@@ -14,4 +14,4 @@ RUN npm ci --only=production
 COPY --from=builder /usr/src/app ./
 USER node
 EXPOSE 3000
-CMD ["node", "index.js"]
+CMD ["node", "start"]
