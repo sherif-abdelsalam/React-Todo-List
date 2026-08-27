@@ -1,0 +1,27 @@
+name: service2-pipeline - CD
+'on':
+  push:
+    branches:
+      - main
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Update Kubeconfig for Amazon EKS
+        run: aws eks update-kubeconfig --name demo-cluster --region ${{ secrets.AWS_REGION }}
+      - name: Deploy Manifests to Kubernetes
+        run: |-
+          kubectl apply -f k8s/namespace.yaml
+                  kubectl apply -f k8s/limitrange.yaml
+                  kubectl apply -f k8s/resourcequota.yaml
+                  kubectl apply -f k8s/
