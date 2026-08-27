@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todoApp
+  namespace: todoappns
+  labels:
+    app: todoApp
+    app.kubernetes.io/managed-by: devops-platform
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: todoApp
+  template:
+    metadata:
+      labels:
+        app: todoApp
+    spec:
+      containers:
+        - name: todoApp
+          image: 997206200726.dkr.ecr.us-east-1.amazonaws.com/e71-0351-4e1d-a822-8e90db8812e6:latest
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              cpu: 250m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 500Mi

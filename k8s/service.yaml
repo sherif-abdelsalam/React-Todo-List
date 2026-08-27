@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: todoApp
+  namespace: todoappns
+  labels:
+    app: todoApp
+spec:
+  type: ClusterIP
+  selector:
+    app: todoApp
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
