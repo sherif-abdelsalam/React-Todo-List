@@ -21,7 +21,7 @@ jobs:
         run: echo "MANIFEST_B64=$(tar -czf - k8s | base64 -w0)" >> "$GITHUB_ENV"
       - name: Deploy to VM via AWS SSM
         run: |-
-          INSTANCE_ID="i-075c304f177ccb8d1"
+          INSTANCE_ID="${{ secrets.VM_INSTANCE_ID }}"
 
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "$INSTANCE_ID" \
