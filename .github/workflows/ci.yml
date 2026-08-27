@@ -1,0 +1,37 @@
+name: service2-pipeline
+'on':
+  push:
+    branches:
+      - main
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
+      - name: Install Dependencies
+        run: npm ci
+      - name: Build Application
+        run: npm run build --if-present
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Build Docker Image
+        run: docker build -t 997206200726.dkr.ecr.us-east-1.amazonaws.com/e71-0351-4e1d-a822-8e90db8812e6:${{ github.sha }} -t 997206200726.dkr.ecr.us-east-1.amazonaws.com/e71-0351-4e1d-a822-8e90db8812e6:latest .
+      - name: Push to AWS ECR
+        run: docker push 997206200726.dkr.ecr.us-east-1.amazonaws.com/e71-0351-4e1d-a822-8e90db8812e6:${{ github.sha }} && docker push 997206200726.dkr.ecr.us-east-1.amazonaws.com/e71-0351-4e1d-a822-8e90db8812e6:latest
