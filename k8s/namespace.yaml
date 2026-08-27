@@ -4,4 +4,4 @@ metadata:
   name: todoappns
   labels:
     app.kubernetes.io/managed-by: devops-platform
-    app.kubernetes.io/part-of: todoApp
+    app.kubernetes.io/part-of: todoapp

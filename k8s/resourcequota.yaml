@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: ResourceQuota
 metadata:
-  name: todoApp-quota
+  name: todoapp-quota
   namespace: todoappns
   labels:
-    app: todoApp
+    app: todoapp
 spec:
   hard:
     requests.cpu: 1
