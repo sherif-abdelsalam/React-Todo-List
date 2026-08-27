@@ -1,0 +1,58 @@
+name: service1-pipeline - CD
+'on':
+  push:
+    branches:
+      - main
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Package Kubernetes Manifests
+        run: echo "MANIFEST_B64=$(tar -czf - k8s | base64 -w0)" >> "$GITHUB_ENV"
+      - name: Deploy to VM via AWS SSM
+        run: |-
+          INSTANCE_ID="i-075c304f177ccb8d1"
+
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy ${{ github.repository }}@${{ github.sha }}" \
+            --parameters commands='["set -e","mkdir -p /tmp/k8s-deploy","cd /tmp/k8s-deploy","echo \"${{ env.MANIFEST_B64 }}\" | base64 -d | tar -xzf -","export KUBECONFIG=/root/.kube/config","kubectl config use-context kind-kind","kubectl apply -f k8s/namespace.yaml","kubectl apply -f k8s/limitrange.yaml","kubectl apply -f k8s/resourcequota.yaml","kubectl apply -f k8s/"]' \
+            --query "Command.CommandId" --output text)
+
+          echo "SSM command id: $COMMAND_ID"
+
+          # Give the command a moment to be registered before polling it.
+          sleep 5
+
+          STATUS="InProgress"
+          for i in $(seq 1 30); do
+            STATUS=$(aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "$INSTANCE_ID" \
+              --query "Status" --output text 2>/dev/null || echo "Pending")
+            if [ "$STATUS" != "Pending" ] && [ "$STATUS" != "InProgress" ]; then
+              break
+            fi
+            sleep 5
+          done
+
+          echo "--- stdout ---"
+          aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" --query "StandardOutputContent" --output text
+          echo "--- stderr ---"
+          aws ssm get-command-invocation --command-id "$COMMAND_ID" --instance-id "$INSTANCE_ID" --query "StandardErrorContent" --output text
+
+          if [ "$STATUS" != "Success" ]; then
+            echo "SSM deployment failed with status: $STATUS"
+            exit 1
+          fi
