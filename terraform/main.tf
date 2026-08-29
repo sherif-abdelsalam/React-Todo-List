@@ -10,7 +10,7 @@ module "network" {
 module "ecr" {
   source = "./modules/ecr"
 
-  name                 = "e71-0351-4e1d-a822-8e90db8812e6"
+  name                 = "ef524-0321-446a-b638-4263e657414a"
   image_tag_mutability = "MUTABLE"
   scan_on_push         = true
   force_delete         = false
