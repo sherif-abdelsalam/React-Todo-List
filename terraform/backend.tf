@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
     bucket         = "infra-automation-app"
-    key            = "12310e71-0351-4e1d-a822-8e90db8812e6/dev/terraform.tfstate"
+    key            = "959ef524-0321-446a-b638-4263e657414a/dev/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
   }
