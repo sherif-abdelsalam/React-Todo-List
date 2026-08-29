@@ -3,7 +3,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Service     = "12310e71-0351-4e1d-a822-8e90db8812e6"
+      Service     = "959ef524-0321-446a-b638-4263e657414a"
       Environment = "dev"
       ManagedBy   = "autodeployers"
     }
